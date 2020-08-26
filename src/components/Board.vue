@@ -37,6 +37,12 @@
 				itemToView: {}
 			}
 		},
+
+		// When component mounts (lifecycle hook)		
+		mounted () {
+			this.getBoardContent()
+		},
+
 		// State from central store
 		computed: {
 			...mapState({
@@ -63,6 +69,16 @@
 			},
 			editClickedHandler() {
 				this.$store.commit('setEditingFeed')
+			},
+			getBoardContent() {
+                this.$store.dispatch('boardContentRequest')
+                .then(() => {
+                    // do something..
+                    // board content probably stored in central store, not here.
+                }, (err) => {
+                    // promise rejected, do something.
+                    console.log(err)
+                })
 			}
 		}
 	}

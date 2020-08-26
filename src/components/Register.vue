@@ -1,7 +1,7 @@
 <template>
-    <div>
-        <h1>Register Screen</h1>
-        <div class="formcontainer">
+    <div :style="{paddingTop: '50px'}">
+        <div class="formContainer">
+            <div class="formHeader">Register</div>
             <form>
                 <div class="inputblock">
                     <label class="label" for="fname">First name</label>
@@ -38,7 +38,11 @@
                 <div class="inputblock">
                     <button type="button" @click="submitFormHandler()"> SUBMIT </button>
                 </div>
-            </form> 
+            </form>             
+            <p>
+                Already registered?
+                <router-link to="/login"> sign in! </router-link>
+            </p>
         </div>
     </div>
 </template>
@@ -116,6 +120,20 @@
                 {
                     // everything is valid, do something
                     console.log("EVERYTHING IS VALID")
+
+                    const { password, repeatedPassword, email, fname, lname, day, month, year } = this 
+
+                    this.$store.dispatch('registerRequest', { password, repeatedPassword, email, fname, lname, day, month, year })
+                    .then((resp) => {
+                        console.log(resp)
+                        if (resp.status == 200) {
+                            // this.$router.push({ path: '/home' })
+                        }
+                    }, (err) => {
+                        // promise rejected, do something.
+                        console.log(err)
+                    })
+
                 }
             },
             // Validates that the input string is a valid date formatted as "mm/dd/yyyy"

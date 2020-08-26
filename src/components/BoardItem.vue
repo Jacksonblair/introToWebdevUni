@@ -1,7 +1,15 @@
 <template>
 	<div :class="
-		[ editingFeed ? ['editing', categoryStyles[item.category]] : 
-		[activeItem == index ? 'activeItem' : 'item', categoryStyles[item.category]]]">
+		[ 
+			// If editing feed, all items have same style
+			editingFeed ? ['item', 'editing', categoryStyles[item.category]] : 
+			// If there is no active item, give default style
+			(activeItem == undefined) ? ['item', 'default', categoryStyles[item.category]] : 
+			// If activeItem is equal to this items index (it is active), show active item style
+			(activeItem == index) ? ['item', 'active', categoryStyles[item.category]] :
+			// else show non active style
+			['item', 'inactive', categoryStyles[item.category]]
+		]">
 
 		<div class="left">	
 			<div v-if="!editingFeed" class="dateBox">
@@ -55,6 +63,8 @@
 		background: #adbfff;
 	}
 
+
+
 	.left, .right {
 		display: inline-block;
 		height: 100%;
@@ -69,46 +79,44 @@
 		width: calc(100% - 40px);
 	}
 
-	.activeItem {
-		height: auto;
-		margin: 10px 0px;
-		margin-right: 2%;
-		margin-left: 3%;	
-		border: 1px solid grey;
-		padding: 1%;	
-		white-space: nowrap;
-	}
-
 	.item {
 		height: auto;
 		margin: 10px 0px;
-		margin-left: 0%;
-		margin-right: 5%;
 		border: 1px solid grey;
 		transition: 0.3s all;
 		padding: 1%;
 		white-space: nowrap;
 	}
 
-	.editing {
-		height: auto;
-		margin: 10px 0px;
-		margin-left: 0%;
-		margin-right: 5%;
-		border: 1px solid grey;
-		transition: 0.3s all;
-		padding: 1%;
-		white-space: nowrap;	
+	.default {
+		margin-left: 2.5%;
+		margin-right: 2.5%;
 	}
 
-	.item .title, .activeItem .title, .editing .title {
+	.active {
+		margin-right: 0%;
+		margin-left: 5%;
+	}
+
+	.inactive {
+		margin-right: 2.5%;
+		margin-left: 2.5%;
+		opacity: 0.75;
+	}
+
+	.editing {
+		margin-left: 2.5%;
+		margin-right: 2.5%;		
+	}
+
+	.item .title {
 		font-weight: bold;
 		font-size: 20px;
 	}
 
 	.item:hover {
-		margin-right: 2%;
-		margin-left: 3%;
+		margin-right: 0%;
+		margin-left: 5%;
 	}
 
 	.item p, .activeItem p, .editing p {

@@ -5,44 +5,67 @@
             <form>
                 <div class="inputblock">
                     <label class="label" for="fname">First name</label>
-                    <input v-model="fname" autocomplete="given-name" class="input" type="text" placeholder="first name" name="fname">
+                    <input :class="[registrationPending ? 'input disabledInput' : 'input']" 
+                    v-model="fname" autocomplete="given-name" type="text" placeholder="first name" name="fname">
                     <div class="warning" v-if="!fnameValid">Invalid input</div>
                 </div>
                 <div class="inputblock">
                     <label class="label" for="lname">Last name</label>
-                    <input v-model="lname" autocomplete="family-name" class="input" type="text" placeholder="last name" name="lname">
+                    <input :class="[registrationPending ? 'input disabledInput' : 'input']"  
+                    v-model="lname" autocomplete="family-name" type="text" placeholder="last name" name="lname">
                     <div class="warning" v-if="!lnameValid">Invalid input</div>
                 </div>
                 <div class="inputblock">
                     <label class="label" for="email">E-mail</label>
-                    <input v-model="email" autocomplete="email" class="input" type="text" placeholder="email" name="email">
+                    <input :class="[registrationPending ? 'input disabledInput' : 'input']"  
+                    v-model="email" autocomplete="email" type="text" placeholder="email" name="email">
                     <div class="warning" v-if="!emailValid">E-mail is not valid</div>
                 </div>              
                 <div class="inputblock">
                     <label class="label" for="email">Date of Birth</label>
-                    <input v-model="day" autocomplete="bday-day" placeholder="DD" class="input dob" type="text" name="day">
-                    <input v-model="month" autocomplete="bday-month" placeholder="MM" class="input dob" type="text" name="month">
-                    <input v-model="year" autocomplete="bday-year" placeholder="YYYY" class="input dob" type="text" name="year">
+                    <input :class="[registrationPending ?  'input dob disabledInput' : 'input dob']"   
+                    v-model="day" autocomplete="bday-day" placeholder="DD" class="input dob" type="text" name="day">
+                    <input :class="[registrationPending ?  'input dob disabledInput' : 'input dob']" 
+                    v-model="month" autocomplete="bday-month" placeholder="MM" type="text" name="month">
+                    <input :class="[registrationPending ?  'input dob disabledInput' : 'input dob']"  
+                    v-model="year" autocomplete="bday-year" placeholder="YYYY" type="text" name="year">
                     <div class="warning" v-if="!dateValid">Date is invalid</div>
                 </div>
                 <div class="inputblock">
                     <label class="label" for="password">Password</label>
-                    <input v-model="password" autocomplete="new-password" class="input" type="password" placeholder="password" name="password">
+                    <input :class="[registrationPending ?  'input disabledInput' : 'input']"   
+                    v-model="password" autocomplete="new-password" type="password" placeholder="password" name="password">
                 </div>
                 <div class="inputblock">
                     <label class="label" for="rpassword">Re-enter Password</label>
-                    <input v-model="repeatedPassword" class="input" autocomplete="new-password" type="password" placeholder="password" name="rpassword">
+                    <input :class="[registrationPending ?  'input disabledInput' : 'input']"   
+                    v-model="repeatedPassword" autocomplete="new-password" type="password" placeholder="password" name="rpassword">
                     <div class="warning" v-if="!passwordValid">Password is not long enough.</div>
                     <div class="warning" v-if="!passwordsMatch">Passwords do not match.</div>
                 </div>
-                <div class="inputblock">
+ 
+                <div v-if="error" class="formError">
+                    {{error}}
+                </div>
+                <div v-if="registrationPending">
+                    Registering...
+                </div>
+                <div v-else-if="canLogin">
+                    <p>
+                        Success!
+                        <router-link to="/login"> Log in! </router-link>
+                    </p>
+                </div>
+                <div v-else-if="!registrationPending && !error" class="inputblock">
                     <button type="button" @click="submitFormHandler()"> SUBMIT </button>
                 </div>
+
             </form>             
-            <p>
+            <p v-if="!registrationPending && !canLogin">
                 Already registered?
-                <router-link to="/login"> sign in! </router-link>
+                <router-link to="/login"> Log in! </router-link>
             </p>
+
         </div>
     </div>
 </template>
@@ -66,7 +89,11 @@
                 day: null,
                 month: null,
                 year: null,
-                dateValid: true
+                dateValid: true,    
+
+                registrationPending: false,
+                canLogin: false,
+                error: ''
             }
         },
         methods: {
@@ -123,11 +150,17 @@
 
                     const { password, repeatedPassword, email, fname, lname, day, month, year } = this 
 
+                    this.registrationPending = true;
+
                     this.$store.dispatch('registerRequest', { password, repeatedPassword, email, fname, lname, day, month, year })
                     .then((resp) => {
-                        console.log(resp)
-                        if (resp.status == 200) {
-                            // this.$router.push({ path: '/home' })
+                        if (resp.data.error) {
+                            this.error = resp.data.error
+                            this.registrationPending = false
+                        } else if (resp.data.success) {
+                            console.log('Now can login')
+                            this.registrationPending = false
+                            this.canLogin = true                            
                         }
                     }, (err) => {
                         // promise rejected, do something.

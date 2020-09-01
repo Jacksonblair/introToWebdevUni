@@ -5,15 +5,23 @@
             <form>
                 <div class="inputblock">
                     <label class="label" for="email">E-mail</label>
-                    <input class="input" autocomplete="email" v-model="email" type="text" placeholder="email" name="email">
+                    <input :class="[loginPending ? ['input', 'disabledInput'] : 'input']" 
+                    autocomplete="email" v-model="email" type="text" placeholder="email" name="email" :disabled="loginPending">
                     <div class="warning" v-if="!emailValid">E-mail is not valid</div>
                 </div>              
                 <div class="inputblock">
                     <label class="label" for="password">Password</label>
-                    <input class="input" autocomplete="current-password" v-model="password" type="password" placeholder="password" name="password">
+                    <input :class="[loginPending ? ['input', 'disabledInput'] : 'input']" 
+                    autocomplete="current-password" v-model="password" type="password" placeholder="password" name="password">
                 </div>
                 <div class="inputblock">
                     <button type="button" @click="submitFormHandler()"> LOG IN </button>
+                </div>
+                <div v-if="error" class="formError">
+                    {{error}}
+                </div>
+                <div v-if="loginPending && !error">
+                    Logging in...
                 </div>
             </form> 
             <p>
@@ -38,7 +46,10 @@
             return {
                 password: '',
                 email: '',
-                emailValid: true
+                emailValid: true,
+
+                loginPending: false,
+                error: ''
             }
         },
         methods: {
@@ -53,10 +64,21 @@
                     // email is valid, so send dispatch.
                     const { password, email } = this 
 
+                    this.loginPending = true
                     this.$store.dispatch('authRequest', { password, email })
                     .then((resp) => {
-                        // redirect somewhere..
-                        console.log(resp)
+
+                        setTimeout(() => {
+                            if (resp.data.error) {
+                                this.error = resp.data.error
+                                this.loginPending = false
+                            } else if (resp.data.success) {
+                                this.loginPending = false
+                                // do something
+                            }
+                        }, 2000)
+
+
                     }, (err) => {
                         // promise rejected, do something.
                         console.log(err)
@@ -97,11 +119,20 @@
         margin: 5px;
     }
 
+    .inputblock .disabledInput {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
     .inputblock .input {
         margin: 5px 5px 0px 5px;
         border-radius: 5px;
         border: 1px solid grey;
         padding: 5px;        
+    }
+
+    .inputblock .input:disabled {
+        color: grey;
     }
 
     .inputblock .label {
@@ -121,6 +152,14 @@
         border: 1px solid lightgrey;
         box-shadow: 4px 4px #e7e7e7;
         margin: 50px auto;
+    }
+
+    .formError {
+        color: red;
+        border: 1px solid red;
+        border-radius: 10px;
+        padding: 8px;
+        background: #ffeaea;
     }
 
 </style>
